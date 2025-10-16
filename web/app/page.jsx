@@ -1,45 +1,53 @@
-'use client';
-import useSWR from 'swr';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000';
-
-const fetcher = (url) => fetch(url, { credentials: 'include' }).then(r => {
-  if (!r.ok) throw new Error('error');
-  return r.json();
-});
-
 export default function Home() {
-  const { data, error, mutate } = useSWR(null, null); // lazy
-
-  const login = () => {
-    window.location.href = `${API_BASE}/auth/login`;
-  };
-
-  const loadAccounts = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/me/accounts`, { credentials: 'include' });
-      const json = await res.json();
-      (window).__ACCOUNTS__ = json;
-      alert('Cuentas cargadas; revisá la consola.');
-      console.log('Accounts+IG:', json);
-    } catch (e) {
-      alert('Error cargando cuentas (¿hiciste login?)');
-    }
-  };
-
   return (
-    <main>
-      <h1>IG CRM — Starter</h1>
-      <p>Conectá tu Meta y listá todas tus IG vinculadas para tildarlas en masa.</p>
-      <div style={{ display:'flex', gap:12, marginTop: 12 }}>
-        <button onClick={login}>Conectar Meta</button>
-        <button onClick={loadAccounts}>Listar IG</button>
+    <main
+      style={{
+        maxWidth: 720,
+        margin: '0 auto',
+        paddingTop: 80,
+        textAlign: 'center',
+      }}
+    >
+      <h1 style={{ fontSize: 36, marginBottom: 16 }}>Empezá a responder tus DMs</h1>
+      <p style={{ fontSize: 18, margin: '0 auto 32px', maxWidth: 520 }}>
+        Conectá tus cuentas de Instagram una vez y gestioná todos los mensajes desde un solo inbox.
+      </p>
+      <a
+        href="/connect"
+        style={{
+          display: 'inline-block',
+          background: '#2563eb',
+          color: '#ffffff',
+          padding: '18px 36px',
+          borderRadius: 999,
+          fontSize: 18,
+          fontWeight: 600,
+          textDecoration: 'none',
+          boxShadow: '0 10px 30px rgba(37, 99, 235, 0.25)',
+        }}
+      >
+        Conectar Instagram
+      </a>
+      <div style={{ marginTop: 48, display: 'flex', justifyContent: 'center', gap: 24 }}>
+        <div style={{ maxWidth: 180 }}>
+          <strong>1. Autorizá</strong>
+          <p style={{ marginTop: 8, fontSize: 14, color: '#4b5563' }}>
+            Iniciá sesión con Meta y aceptá el acceso a tus cuentas de Instagram.
+          </p>
+        </div>
+        <div style={{ maxWidth: 180 }}>
+          <strong>2. Guardá</strong>
+          <p style={{ marginTop: 8, fontSize: 14, color: '#4b5563' }}>
+            Elegí todas tus cuentas y guardá la conexión en un solo paso.
+          </p>
+        </div>
+        <div style={{ maxWidth: 180 }}>
+          <strong>3. Respondé</strong>
+          <p style={{ marginTop: 8, fontSize: 14, color: '#4b5563' }}>
+            Abrí el inbox y respondé mensajes sin salir de esta pantalla.
+          </p>
+        </div>
       </div>
-
-      <hr style={{ margin: '24px 0' }} />
-
-      <h2>Inbox unificado (placeholder)</h2>
-      <p>Acá va tu UI de conversaciones y mensajes. Pedile a Codex que la construya a partir del endpoint del webhook y la DB.</p>
     </main>
   );
 }

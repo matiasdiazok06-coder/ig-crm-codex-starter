@@ -10,36 +10,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Account {
-  id              String   @id @default(cuid())
-  igUserId        String   @unique
-  username        String
-  accessToken     String   // cifrado/encapsulado fuera del repo
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+model OAuthToken {
+  id        String   @id @default(cuid())
+  account   Account? @relation(fields: [accountId], references: [id])
+  accountId String?
+  kind      OAuthTokenKind
+  tokenEnc  String
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-  conversations   Conversation[]
+model Account {
+  id             String   @id @default(cuid())
+  pageId         String
+  pageName       String?
+  igUserId       String   @unique
+  username       String
+  accessTokenEnc String
+  connectedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  conversations  Conversation[]
+  tokens         OAuthToken[]
 }
 
 model Conversation {
-  id            String   @id @default(cuid())
-  account       Account  @relation(fields: [accountId], references: [id])
-  accountId     String
-  peerIgUserId  String
-  lastMessageAt DateTime @default(now())
+  id                 String   @id @default(cuid())
+  account            Account  @relation(fields: [accountId], references: [id])
+  accountId          String
+  peerIgUserId       String
+  peerIgUsername     String?
+  lastMessageAt      DateTime @default(now())
+  lastMessageSnippet String?
+  unreadCount        Int      @default(0)
 
-  messages      Message[]
-  @@index([accountId, peerIgUserId])
+  messages           Message[]
+  @@unique([accountId, peerIgUserId])
 }
 
 model Message {
-  id             String   @id @default(cuid())
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  id             String            @id @default(cuid())
+  conversation   Conversation      @relation(fields: [conversationId], references: [id])
   conversationId String
-  direction      String   // 'in' | 'out'
-  igMessageId    String   @unique
+  direction      MessageDirection
+  igMessageId    String            @unique
   text           String?
-  createdAt      DateTime @default(now())
+  senderIgUserId String?
+  createdAt      DateTime          @default(now())
 
   @@index([igMessageId])
+}
+
+enum OAuthTokenKind {
+  user
+  page
+  ig
+}
+
+enum MessageDirection {
+  in
+  out
 }
