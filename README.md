@@ -1,91 +1,54 @@
 # IG CRM Codex Starter
 
-Monorepo mínimo para construir un **CRM de DMs de Instagram** con ayuda de *Codex* (asistente de código). 
-Incluye:
-- `api/`: servidor Express (Node.js) con rutas de OAuth de Meta, listado masivo de IG y webhook de mensajes.
-- `web/`: app Next.js con botón **Conectar Meta** + bandeja unificada (placeholder) que consume `api/`.
-- `prisma/`: esquema base para Postgres (cuentas, conversaciones, mensajes, tokens).
-- `.env.example`: variables requeridas.
+Bienvenido a tu bandeja unificada para mensajes de Instagram. Todo el flujo está pensado para que conectes tus cuentas en pocos clics y empieces a responder al instante.
 
-> Pensado para que se lo des a Codex y te autogenere/complete lo que falta.
+## Empezá en 3 pasos
 
----
+1. **Hacé clic en “Conectar Instagram” y autorizá.** Se abre la ventana de Meta para que elijas las cuentas a las que querés dar acceso.
+2. **Seleccioná tus cuentas y tocá “Guardar selección”.** Desde la misma pantalla podés marcar todas y dejar la conexión lista.
+3. **Abrí Inbox para ver y responder mensajes.** Vas a encontrar todas las conversaciones ordenadas y podés contestar sin salir del sitio.
 
-## Requisitos
+## ¿No ves tus mensajes?
 
-- Node 18+
-- Postgres 14+ (opcional por ahora)
-- Una App en **Meta for Developers** con los scopes: 
-  `instagram_manage_messages`, `instagram_basic`, `pages_manage_metadata`, `pages_show_list`.
+- Revisá que aceptaste todos los permisos al conectar Instagram.
+- Desde el Inbox, recargá la vista para traer las últimas conversaciones.
+- En Instagram: *Configuración → Privacidad → Mensajes → Herramientas conectadas* debe estar en **Activado**.
 
-> Si vas a usar el inbox con muchas cuentas, deberás pasar la app a **Live** y el permiso `instagram_manage_messages` a **Advanced**.
+## Qué incluye
 
-## Variables de entorno
+- **api/**: servidor Express con login de Meta, conexión de cuentas, webhook de mensajes y envío de respuestas.
+- **web/**: app Next.js con las pantallas *Conectar Instagram* e *Inbox* con refresco automático.
+- **prisma/**: esquema de base de datos para cuentas, conversaciones, mensajes y tokens cifrados.
+- `.env.example`: lista de variables necesarias (Meta, Postgres, Redis y claves locales).
 
-Copia `.env.example` a `api/.env` y `web/.env.local` (si aplica) y completa:
+## Requisitos básicos
 
-```env
-META_APP_ID=
-META_APP_SECRET=
-META_REDIRECT_URI=http://localhost:4000/auth/callback
-META_APP_VERIFY_TOKEN=tu_token_de_verificacion_webhook
-META_API_VERSION=v20.0
-SESSION_SECRET=cualquier_string_seguro
-# Opcional DB
-DATABASE_URL=postgresql://user:pass@localhost:5432/igcrm
-```
+- Node.js 18 o superior.
+- Base de datos Postgres y Redis (podés usar el `docker-compose.yml` incluido).
+- Crear una app en [Meta for Developers](https://developers.facebook.com/) con los permisos `instagram_manage_messages`, `instagram_basic`, `pages_manage_metadata` y `pages_show_list`.
 
-## Cómo correr local
+## Cómo correr el proyecto
 
-En una terminal (API):
 ```bash
+# Backend
 cd api
-npm i
+npm install
 npm run dev
-```
 
-En otra terminal (Web):
-```bash
+# Frontend
 cd web
-npm i
+npm install
 npm run dev
 ```
 
-- API corre en `http://localhost:4000`
-- Web corre en `http://localhost:3000`
+- API disponible en `http://localhost:4000`.
+- Web disponible en `http://localhost:3000`.
 
-Abrí `http://localhost:3000` y tocá **Conectar Meta**.
+Cuando ambos servicios estén activos, visitá `http://localhost:3000` y seguí los 3 pasos de la sección “Empezá en 3 pasos”.
 
-## Endpoints clave del API
+## Pruebas rápidas
 
-- `GET /auth/login` → abre el diálogo de permisos de Meta (multi-selección de Páginas).
-- `GET /auth/callback` → intercambia `code` por token y guarda en DB (a completar si querés DB).
-- `GET /me/accounts` → lista Páginas + IG vinculadas (`/me/accounts?fields=...,instagram_business_accountEllipsis`).
-- `GET /webhooks/meta` → verificación `hub.challenge` del webhook.
-- `POST /webhooks/meta` → recepción de DMs (`object: instagram`, `field: messages`).
+- Enviá un mensaje desde otra cuenta a una de tus cuentas conectadas: debería aparecer en el Inbox en pocos segundos.
+- Respondé desde el Inbox con el botón **Responder** y verificá que el mensaje llegue al chat real.
 
-## Push a GitHub (o "HipHub")
-
-1) Creá un repo vacío en GitHub.
-2) Desde la carpeta raíz de este proyecto:
-
-```bash
-git init
-git add .
-git commit -m "IG CRM Codex starter"
-git branch -M main
-git remote add origin https://github.com/TU-USUARIO/ig-crm-codex-starter.git
-git push -u origin main
-```
-
-## Qué pedirle a Codex (prompt ejemplo)
-
-> *“Actuá como arquitecto y generador de código. Completá este repo Next.js + Express para un CRM de mensajes de Instagram. Objetivos:*
-> *1) Implementar el intercambio de `code` por `access_token` en `/auth/callback` y guardar tokens en Postgres (tablas del prisma/schema).*
-> *2) Implementar `GET /me/accounts` que devuelva todas mis Páginas y sus `instagram_business_account` con `username` e `id` para mostrarlas en checkboxes en `web/`. *
-> *3) Implementar el webhook `POST /webhooks/meta` para eventos de `messages` con idempotencia (dedupe por `message.id`) y persistencia en `messages` y `conversations`. *
-> *4) En `web/`, crear una UI de Inbox Unificado (lista de conversaciones, panel de mensajes, filtro por cuenta) llamando a `api/`. *
-> *5) Manejar rate limits con backoff exponencial y colas (BullMQ).*
-> *6) Agregar tests unitarios en API y e2e simples en web.”*
-
-¡Listo para iterar!
+¡Listo! Ya tenés el flujo completo para conectar Instagram y centralizar tus DMs.
